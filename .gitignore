@@ -1,0 +1,4 @@
+# ide folder
+.idea/
+# pdf file
+*.pdf
