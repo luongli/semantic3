@@ -48,6 +48,59 @@ Object* checkDelcaredParam(Scope *scope, char *name) {
 }
 
 
+/**
+ * Check if a function or procedure name is global functions or procedures
+ * @param name
+ * @return
+ */
+int isGlobalPs(char *name) {
+    if (name == NULL) return 0;
+    char globalPs[3][20] = {"WRITELN", "WRITEI", "WRITEC"};
+    int i = 0;
+    int n = strlen(name);
+    char cname[n];
+
+    // convert to upper case
+    for (i = 0; i < n; i++) {
+        cname[i] = toupper(name[i]);
+    }
+    cname[i] = '\0';
+    // compare the name with all global procedures and functions
+    for (i = 0; i < 3; i++) {
+        if (strcmp(cname, globalPs[i]) == 0) {
+            // printf("call %s\n", globalPFs[i]);
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+int isGlobalFs(char *name) {
+    if (name == NULL) return 0;
+    char globalFs[2][20] = {"READC", "READI"};
+    int i = 0;
+    int n = strlen(name);
+    char cname[n];
+
+    // convert to upper case
+    for (i = 0; i < n; i++) {
+        cname[i] = toupper(name[i]);
+    }
+    cname[i] = '\0';
+
+    // compare the name with all global procedures and functions
+    for (i = 0; i < 2; i++) {
+        if (strcmp(cname, globalFs[i]) == 0) {
+            // printf("call %s\n", globalPFs[i]);
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+
 Object* lookupObject(char *name) {
     if (name == NULL) return NULL;
     Scope *currentScope = symtab->currentScope;
@@ -78,6 +131,10 @@ Object* lookupObject(char *name) {
 void checkFreshIdent(char *name) {
     ObjectNode *list = symtab->currentScope->objList;
     Object *owner = symtab->currentScope->owner;
+
+    if (isGlobalFs(name) || isGlobalPs(name)) {
+        error(ERR_DUPLICATE_IDENT, currentToken->lineNo, currentToken->colNo);
+    }
 
     // search for object having name in the object list
     while(list != NULL) {
@@ -111,6 +168,12 @@ void checkFreshIdent(char *name) {
 
 
 Object* checkDeclaredIdent(char* name) {
+    if (isGlobalFs(name)) {
+        Object *ret = (Object*) malloc(sizeof(Object));
+        ret->kind = OBJ_FUNCTION;
+        return ret;
+    }
+
     Object *found = lookupObject(name);
 
     if(found) return found;
@@ -163,58 +226,6 @@ Object* checkDeclaredFunction(char* name) {
   // TODO
 }
 
-
-/**
- * Check if a function or procedure name is global functions or procedures
- * @param name
- * @return
- */
-int isGlobalPs(char *name) {
-    if (name == NULL) return 0;
-    char globalPs[3][20] = {"WRITELN", "WRITEI", "WRITEC"};
-    int i = 0;
-    int n = strlen(name);
-    char cname[n];
-
-    // convert to upper case
-    for (i = 0; i < n; i++) {
-        cname[i] = toupper(name[i]);
-    }
-    cname[i] = '\0';
-    // compare the name with all global procedures and functions
-    for (i = 0; i < 3; i++) {
-        if (strcmp(cname, globalPs[i]) == 0) {
-            // printf("call %s\n", globalPFs[i]);
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-int isGlobalFs(char *name) {
-    if (name == NULL) return 0;
-    char globalFs[2][20] = {"READC", "READI"};
-    int i = 0;
-    int n = strlen(name);
-    char cname[n];
-
-    // convert to upper case
-    for (i = 0; i < n; i++) {
-        cname[i] = toupper(name[i]);
-    }
-    cname[i] = '\0';
-
-    // compare the name with all global procedures and functions
-    for (i = 0; i < 2; i++) {
-        if (strcmp(cname, globalFs[i]) == 0) {
-            // printf("call %s\n", globalPFs[i]);
-            return 1;
-        }
-    }
-
-    return 0;
-}
 
 Object* checkDeclaredProcedure(char* name) {
     if (isGlobalPs(name)) {
