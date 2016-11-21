@@ -3,7 +3,6 @@
  * @author Huu-Duc Nguyen
  * @version 1.0
  */
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "reader.h"
@@ -12,7 +11,7 @@
 #include "semantics.h"
 #include "error.h"
 #include "debug.h"
-#include "token.h"
+#include <stdio.h>
 
 Token *currentToken;
 Token *lookAhead;
@@ -671,7 +670,6 @@ void compileFactor(void) {
     eat(TK_IDENT);
     // check if the identifier is declared
     obj = checkDeclaredIdent(currentToken->string);
-
     switch (obj->kind) {
     case OBJ_CONSTANT:
       break;

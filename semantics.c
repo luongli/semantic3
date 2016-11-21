@@ -136,6 +136,14 @@ void checkFreshIdent(char *name) {
         error(ERR_DUPLICATE_IDENT, currentToken->lineNo, currentToken->colNo);
     }
 
+    // if owner is a function,
+    // check if the current identifier has the same name with function
+    if(owner->kind == OBJ_FUNCTION) {
+        if(strcmp(name, owner->name) == 0) {
+            error(ERR_DUPLICATE_IDENT, currentToken->lineNo, currentToken->colNo);
+        }
+    }
+
     // search for object having name in the object list
     while(list != NULL) {
         if (strcmp(name, list->object->name) == 0) {
@@ -176,7 +184,9 @@ Object* checkDeclaredIdent(char* name) {
 
     Object *found = lookupObject(name);
 
-    if(found) return found;
+    if(found) {
+        return found;
+    }
 
     // if we cannot find any object having the same name
     error(ERR_UNDECLARED_IDENT, currentToken->lineNo, currentToken->colNo);
@@ -258,6 +268,6 @@ Object* checkDeclaredLValueIdent(char* name) {
         return ident;
     }
 
-    error(ERR_UNDECLARED_IDENT, currentToken->lineNo, currentToken->colNo);
+    error(ERR_INVALID_LVALUE, currentToken->lineNo, currentToken->colNo);
 }
 
