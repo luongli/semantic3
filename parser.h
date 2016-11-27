@@ -28,7 +28,7 @@ void compileFuncDecl(void);
 void compileProcDecl(void);
 ConstantValue* compileUnsignedConstant(void);
 ConstantValue* compileConstant(void);
-ConstantValue* compileConstant2(void);
+ConstantValue* compileConstant2(int);
 Type* compileType(void);
 Type* compileBasicType(void);
 void compileParams(void);
