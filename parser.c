@@ -20,6 +20,10 @@ extern Type* intType;
 extern Type* charType;
 extern SymTab* symtab;
 
+#define NO_CONSTRAINT 0
+#define INT_TYPE 1
+// TODO process the error undeclare integer constant in the case a = 1; b = +a; b = -a;
+
 void scan(void) {
   Token* tmp = currentToken;
   currentToken = lookAhead;
@@ -240,11 +244,11 @@ ConstantValue* compileConstant(void) {
   switch (lookAhead->tokenType) {
   case SB_PLUS:
     eat(SB_PLUS);
-    constValue = compileConstant2();
+    constValue = compileConstant2(INT_TYPE);
     break;
   case SB_MINUS:
     eat(SB_MINUS);
-    constValue = compileConstant2();
+    constValue = compileConstant2(INT_TYPE);
     constValue->intValue = - constValue->intValue;
     break;
   case TK_CHAR:
@@ -252,13 +256,13 @@ ConstantValue* compileConstant(void) {
     constValue = makeCharConstant(currentToken->string[0]);
     break;
   default:
-    constValue = compileConstant2();
+    constValue = compileConstant2(NO_CONSTRAINT);
     break;
   }
   return constValue;
 }
 
-ConstantValue *compileConstant2(void) {
+ConstantValue *compileConstant2(int typeConstraint) {
     ConstantValue *constValue;
     Object *obj;
 
@@ -270,10 +274,26 @@ ConstantValue *compileConstant2(void) {
         case TK_IDENT:
             eat(TK_IDENT);
             obj = checkDeclaredConstant(currentToken->string);
-            if ((obj != NULL) && (obj->constAttrs->value->type == TP_INT))
-                constValue = duplicateConstantValue(obj->constAttrs->value);
-            else
-                error(ERR_UNDECLARED_INT_CONSTANT, currentToken->lineNo, currentToken->colNo);
+
+            if (typeConstraint == INT_TYPE) {
+                // if the constraint is an integer type
+                if (obj != NULL && obj->constAttrs->value->type == TP_INT) {
+                    // if the integer constant object is found
+                    constValue = duplicateConstantValue(obj->constAttrs->value);
+                } else {
+                    // if it's not found
+                    error(ERR_UNDECLARED_INT_CONSTANT, currentToken->lineNo, currentToken->colNo);
+                }
+            } else {
+                // otherwise
+                if (obj != NULL) {
+                    // if the constant object is found
+                    constValue = duplicateConstantValue(obj->constAttrs->value);
+                } else {
+                    // if it's not found
+                    error(ERR_UNDECLARED_CONSTANT, currentToken->lineNo, currentToken->colNo);
+                }
+            }
             break;
         default:
             error(ERR_INVALID_CONSTANT, lookAhead->lineNo, lookAhead->colNo);
