@@ -264,6 +264,10 @@ Object* checkDeclaredLValueIdent(char* name) {
     }
     Object *ident = lookupObject(name);
 
+    if (ident == NULL) {
+        error(ERR_UNDECLARED_IDENT, currentToken->lineNo, currentToken->colNo);
+    }
+
     if (ident->kind == OBJ_FUNCTION || ident->kind == OBJ_VARIABLE || ident->kind == OBJ_PARAMETER) {
         return ident;
     }
